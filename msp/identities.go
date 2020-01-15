@@ -174,7 +174,6 @@ func (id *identity) Verify(msg []byte, sig []byte) error {
 // Serialize returns a byte array representation of this identity
 func (id *identity) Serialize() ([]byte, error) {
 	// mspIdentityLogger.Infof("Serializing identity %s", id.id)
-	mspLogger.Infof("-------------------- (id *identity) Serialize(), id=%v\n",id)
 	pb := &pem.Block{Bytes: id.cert.Raw, Type: "CERTIFICATE"}
 	pemBytes := pem.EncodeToMemory(pb)
 	if pemBytes == nil {
