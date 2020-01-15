@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"github.com/tjfoc/gmsm/sm2"
 )
 
 type ECDSASignature struct {
@@ -86,6 +87,17 @@ func SignatureToLowS(k *ecdsa.PublicKey, signature []byte) ([]byte, error) {
 
 // IsLow checks that s is a low-S
 func IsLowS(k *ecdsa.PublicKey, s *big.Int) (bool, error) {
+	halfOrder, ok := curveHalfOrders[k.Curve]
+	if !ok {
+		return false, fmt.Errorf("curve not recognized [%s]", k.Curve)
+	}
+
+	return s.Cmp(halfOrder) != 1, nil
+
+}
+
+// 新增的 为了test
+func IsLowSSm2(k *sm2.PublicKey, s *big.Int) (bool, error) {
 	halfOrder, ok := curveHalfOrders[k.Curve]
 	if !ok {
 		return false, fmt.Errorf("curve not recognized [%s]", k.Curve)

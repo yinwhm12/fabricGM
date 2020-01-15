@@ -20,6 +20,7 @@ import (
 	"github.com/hyperledger/fabric/common/tools/cryptogen/msp"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/yaml.v2"
+	"github.com/hyperledger/fabric/common/flogging"
 )
 
 const (
@@ -214,6 +215,8 @@ var (
 	extConfigFile = ext.Flag("config", "The configuration template to use").File()
 )
 
+var genLogger = flogging.MustGetLogger("common.tools.cryptogen")
+
 func main() {
 	kingpin.Version("0.0.1")
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
@@ -354,7 +357,6 @@ func extendOrdererOrg(orgSpec OrgSpec) {
 		generateOrdererOrg(*inputDir, orgSpec)
 		return
 	}
-
 	signCA := getCA(caDir, orgSpec, orgSpec.CA.CommonName)
 	tlsCA := getCA(tlscaDir, orgSpec, "tls"+orgSpec.CA.CommonName)
 
@@ -379,7 +381,6 @@ func extendOrdererOrg(orgSpec OrgSpec) {
 }
 
 func generate() {
-
 	config, err := getConfig()
 	if err != nil {
 		fmt.Printf("Error reading config: %s", err)
@@ -533,7 +534,6 @@ func generatePeerOrg(baseDir string, orgSpec OrgSpec) {
 		fmt.Printf("Error generating tlsCA for org %s:\n%v\n", orgName, err)
 		os.Exit(1)
 	}
-
 	err = msp.GenerateVerifyingMSP(mspDir, signCA, tlsCA, orgSpec.EnableNodeOUs)
 	if err != nil {
 		fmt.Printf("Error generating MSP for org %s:\n%v\n", orgName, err)
@@ -610,7 +610,6 @@ func copyAdminCert(usersDir, adminCertsDir, adminUserName string) error {
 }
 
 func generateNodes(baseDir string, nodes []NodeSpec, signCA *ca.CA, tlsCA *ca.CA, nodeType int, nodeOUs bool) {
-
 	for _, node := range nodes {
 		nodeDir := filepath.Join(baseDir, node.CommonName)
 		if _, err := os.Stat(nodeDir); os.IsNotExist(err) {
@@ -628,7 +627,6 @@ func generateNodes(baseDir string, nodes []NodeSpec, signCA *ca.CA, tlsCA *ca.CA
 }
 
 func generateOrdererOrg(baseDir string, orgSpec OrgSpec) {
-
 	orgName := orgSpec.Domain
 
 	// generate CAs
@@ -720,18 +718,25 @@ func printVersion() {
 }
 
 func getCA(caDir string, spec OrgSpec, name string) *ca.CA {
-	_, signer, _ := csp.LoadPrivateKey(caDir)
-	cert, _ := ca.LoadCertificateECDSA(caDir)
+	//_, signer, _ := csp.LoadPrivateKey(caDir)
+	priv, _, err := csp.LoadPrivateKey(caDir)
+	if err != nil{
+		panic(err)
+	}
+	//cert, _ := ca.LoadCertificateECDSA(caDir)
+	cert, _ := ca.LoadCertificateGMSM2(caDir)
 
 	return &ca.CA{
 		Name:               name,
-		Signer:             signer,
-		SignCert:           cert,
+		//Signer:             signer,
+		//SignCert:           cert,
 		Country:            spec.CA.Country,
 		Province:           spec.CA.Province,
 		Locality:           spec.CA.Locality,
 		OrganizationalUnit: spec.CA.OrganizationalUnit,
 		StreetAddress:      spec.CA.StreetAddress,
 		PostalCode:         spec.CA.PostalCode,
+		SignSm2Cert: cert,
+		Sm2Key: priv,
 	}
 }

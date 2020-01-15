@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"github.com/tjfoc/gmsm/sm2"
 )
 
 const testTimeout = 1 * time.Second // conservative
@@ -281,7 +282,7 @@ func TestNewConnection(t *testing.T) {
 			name: "server TLS pinning success",
 			config: comm.ClientConfig{
 				SecOpts: &comm.SecureOptions{
-					VerifyCertificate: func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
+					VerifyCertificate: func(rawCerts [][]byte, verifiedChains [][]*sm2.Certificate) error {
 						if bytes.Equal(rawCerts[0], testCerts.serverCert.Certificate[0]) {
 							return nil
 						}
@@ -304,7 +305,7 @@ func TestNewConnection(t *testing.T) {
 			name: "server TLS pinning failure",
 			config: comm.ClientConfig{
 				SecOpts: &comm.SecureOptions{
-					VerifyCertificate: func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
+					VerifyCertificate: func(rawCerts [][]byte, verifiedChains [][]*sm2.Certificate) error {
 						return errors.New("TLS certificate mismatch")
 					},
 					Certificate:       testCerts.certPEM,

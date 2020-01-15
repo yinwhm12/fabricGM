@@ -9,7 +9,6 @@ package msp
 import (
 	"crypto"
 	"crypto/rand"
-	"crypto/x509"
 	"encoding/hex"
 	"encoding/pem"
 	"time"
@@ -20,6 +19,7 @@ import (
 	"github.com/hyperledger/fabric/protos/msp"
 	"github.com/pkg/errors"
 	"go.uber.org/zap/zapcore"
+	"github.com/tjfoc/gmsm/sm2"
 )
 
 var mspIdentityLogger = flogging.MustGetLogger("msp.identity")
@@ -29,7 +29,8 @@ type identity struct {
 	id *IdentityIdentifier
 
 	// cert contains the x.509 certificate that signs the public key of this instance
-	cert *x509.Certificate
+	//cert *x509.Certificate
+	cert *sm2.Certificate
 
 	// this is the public key of this instance
 	pk bccsp.Key
@@ -38,7 +39,7 @@ type identity struct {
 	msp *bccspmsp
 }
 
-func newIdentity(cert *x509.Certificate, pk bccsp.Key, msp *bccspmsp) (Identity, error) {
+func newIdentity(cert *sm2.Certificate, pk bccsp.Key, msp *bccspmsp) (Identity, error) {
 	if mspIdentityLogger.IsEnabledFor(zapcore.DebugLevel) {
 		mspIdentityLogger.Debugf("Creating identity instance for cert %s", certToPEM(cert))
 	}
@@ -173,7 +174,7 @@ func (id *identity) Verify(msg []byte, sig []byte) error {
 // Serialize returns a byte array representation of this identity
 func (id *identity) Serialize() ([]byte, error) {
 	// mspIdentityLogger.Infof("Serializing identity %s", id.id)
-
+	mspLogger.Infof("-------------------- (id *identity) Serialize(), id=%v\n",id)
 	pb := &pem.Block{Bytes: id.cert.Raw, Type: "CERTIFICATE"}
 	pemBytes := pem.EncodeToMemory(pb)
 	if pemBytes == nil {
@@ -208,7 +209,7 @@ type signingidentity struct {
 	signer crypto.Signer
 }
 
-func newSigningIdentity(cert *x509.Certificate, pk bccsp.Key, signer crypto.Signer, msp *bccspmsp) (SigningIdentity, error) {
+func newSigningIdentity(cert *sm2.Certificate, pk bccsp.Key, signer crypto.Signer, msp *bccspmsp) (SigningIdentity, error) {
 	//mspIdentityLogger.Infof("Creating signing identity instance for ID %s", id)
 	mspId, err := newIdentity(cert, pk, msp)
 	if err != nil {

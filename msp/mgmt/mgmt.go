@@ -149,7 +149,6 @@ func loadLocaMSP() msp.MSP {
 	if mspType == "" {
 		mspType = msp.ProviderTypeToString(msp.FABRIC)
 	}
-
 	var mspOpts = map[string]msp.NewOpts{
 		msp.ProviderTypeToString(msp.FABRIC): &msp.BCCSPNewOpts{NewBaseOpts: msp.NewBaseOpts{Version: msp.MSPv1_4_3}},
 		msp.ProviderTypeToString(msp.IDEMIX): &msp.IdemixNewOpts{NewBaseOpts: msp.NewBaseOpts{Version: msp.MSPv1_1}},

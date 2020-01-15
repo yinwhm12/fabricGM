@@ -8,7 +8,7 @@ package comm
 
 import (
 	"context"
-	"crypto/tls"
+	//"crypto/tls"
 	"fmt"
 	"net"
 	"sync"
@@ -19,7 +19,9 @@ import (
 	proto "github.com/hyperledger/fabric/protos/gossip"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
+	//"google.golang.org/grpc/credentials"
+	tls "github.com/tjfoc/gmtls"
+	credentials "github.com/tjfoc/gmtls/gmcredentials"
 )
 
 type gossipTestServer struct {

@@ -97,7 +97,6 @@ func getPemMaterialFromDir(dir string) ([][]byte, error) {
 
 	for _, f := range files {
 		fullName := filepath.Join(dir, f.Name())
-
 		f, err := os.Stat(fullName)
 		if err != nil {
 			mspLogger.Warningf("Failed to stat %s: %s", fullName, err)
@@ -137,7 +136,7 @@ func SetupBCCSPKeystoreConfig(bccspConfig *factory.FactoryOpts, keystoreDir stri
 	if bccspConfig == nil {
 		bccspConfig = factory.GetDefaultOpts()
 	}
-
+	//if bccspConfig.ProviderName == "SW" || bccspConfig.ProviderName == "GM"{
 	if bccspConfig.ProviderName == "SW" {
 		if bccspConfig.SwOpts == nil {
 			bccspConfig.SwOpts = factory.GetDefaultOpts().SwOpts
@@ -214,24 +213,20 @@ func getMspConfig(dir string, ID string, sigid *msp.SigningIdentityInfo) (*msp.M
 	configFile := filepath.Join(dir, configfilename)
 	tlscacertDir := filepath.Join(dir, tlscacerts)
 	tlsintermediatecertsDir := filepath.Join(dir, tlsintermediatecerts)
-
 	cacerts, err := getPemMaterialFromDir(cacertDir)
 	if err != nil || len(cacerts) == 0 {
 		return nil, errors.WithMessage(err, fmt.Sprintf("could not load a valid ca certificate from directory %s", cacertDir))
 	}
-
 	admincert, err := getPemMaterialFromDir(admincertDir)
 	if err != nil && !os.IsNotExist(err) {
 		return nil, errors.WithMessage(err, fmt.Sprintf("could not load a valid admin certificate from directory %s", admincertDir))
 	}
-
 	intermediatecerts, err := getPemMaterialFromDir(intermediatecertsDir)
 	if os.IsNotExist(err) {
 		mspLogger.Debugf("Intermediate certs folder not found at [%s]. Skipping. [%s]", intermediatecertsDir, err)
 	} else if err != nil {
 		return nil, errors.WithMessage(err, fmt.Sprintf("failed loading intermediate ca certs at [%s]", intermediatecertsDir))
 	}
-
 	tlsCACerts, err := getPemMaterialFromDir(tlscacertDir)
 	tlsIntermediateCerts := [][]byte{}
 	if os.IsNotExist(err) {
@@ -248,7 +243,6 @@ func getMspConfig(dir string, ID string, sigid *msp.SigningIdentityInfo) (*msp.M
 	} else {
 		mspLogger.Debugf("TLS CA certs folder at [%s] is empty. Skipping.", tlsintermediatecertsDir)
 	}
-
 	crls, err := getPemMaterialFromDir(crlsDir)
 	if os.IsNotExist(err) {
 		mspLogger.Debugf("crls folder not found at [%s]. Skipping. [%s]", crlsDir, err)
@@ -334,7 +328,6 @@ func getMspConfig(dir string, ID string, sigid *msp.SigningIdentityInfo) (*msp.M
 	} else {
 		mspLogger.Debugf("MSP configuration file not found at [%s]: [%s]", configFile, err)
 	}
-
 	// Set FabricCryptoConfig
 	cryptoConfig := &msp.FabricCryptoConfig{
 		SignatureHashFamily:            bccsp.SHA2,

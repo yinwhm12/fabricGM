@@ -72,7 +72,6 @@ func NewGossipService(conf *Config, s *grpc.Server, sa api.SecurityAdvisor,
 	mcs api.MessageCryptoService, selfIdentity api.PeerIdentityType,
 	secureDialOpts api.PeerSecureDialOpts, gossipMetrics *metrics.GossipMetrics) Gossip {
 	var err error
-
 	lgr := util.GetLogger(util.GossipLogger, conf.ID)
 
 	g := &gossipServiceImpl{
@@ -92,12 +91,10 @@ func NewGossipService(conf *Config, s *grpc.Server, sa api.SecurityAdvisor,
 		gossipMetrics:         gossipMetrics,
 	}
 	g.stateInfoMsgStore = g.newStateInfoMsgStore()
-
 	g.idMapper = identity.NewIdentityMapper(mcs, selfIdentity, func(pkiID common.PKIidType, identity api.PeerIdentityType) {
 		g.comm.CloseConn(&comm.RemotePeer{PKIID: pkiID})
 		g.certPuller.Remove(string(pkiID))
 	}, sa)
-
 	commConfig := comm.CommConfig{
 		DialTimeout:  conf.DialTimeout,
 		ConnTimeout:  conf.ConnTimeout,

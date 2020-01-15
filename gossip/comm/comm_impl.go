@@ -9,7 +9,6 @@ package comm
 import (
 	"bytes"
 	"context"
-	"crypto/tls"
 	"encoding/hex"
 	"fmt"
 	"reflect"
@@ -26,6 +25,9 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
+
+	tls "github.com/tjfoc/gmtls"
+	//credentials "github.com/tjfoc/gmtls/gmcredentials"
 )
 
 const (

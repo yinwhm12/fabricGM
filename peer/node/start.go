@@ -278,7 +278,6 @@ func serve(args []string) error {
 	privDataDist := func(channel string, txID string, privateData *transientstore.TxPvtReadWriteSetWithConfigInfo, blkHt uint64) error {
 		return service.GetGossipService().DistributePrivateData(channel, txID, privateData, blkHt)
 	}
-
 	signingIdentity := mgmt.GetLocalSigningIdentityOrPanic()
 	serializedIdentity, err := signingIdentity.Serialize()
 	if err != nil {
@@ -316,6 +315,7 @@ func serve(args []string) error {
 
 	policyMgr := peer.NewChannelPolicyManagerGetter()
 
+	logger.Debug("============== initGossipService ==============")
 	// Initialize gossip component
 	err = initGossipService(policyMgr, metricsProvider, peerServer, serializedIdentity, peerEndpoint.Address)
 	if err != nil {
@@ -331,7 +331,6 @@ func serve(args []string) error {
 	// }
 
 	// initialize system chaincodes
-
 	// deploy system chaincodes
 	sccp.DeploySysCCs("", ccp)
 	logger.Infof("Deployed system chaincodes")
@@ -347,7 +346,6 @@ func serve(args []string) error {
 		service.GetGossipService().UpdateChaincodes(chaincodes.AsChaincodes(), gossipcommon.ChainID(channel))
 	})
 	lifecycle.AddListener(onUpdate)
-
 	// this brings up all the channels
 	peer.Initialize(func(cid string) {
 		logger.Debugf("Deploying system CC, for channel <%s>", cid)
@@ -891,7 +889,6 @@ func initGossipService(policyMgr policies.ChannelPolicyManagerGetter, metricsPro
 	)
 	secAdv := peergossip.NewSecurityAdvisor(mgmt.NewDeserializersManager())
 	bootstrap := viper.GetStringSlice("peer.gossip.bootstrap")
-
 	return service.InitGossipService(
 		serializedIdentity,
 		metricsProvider,

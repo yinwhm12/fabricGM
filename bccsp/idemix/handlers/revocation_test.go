@@ -6,9 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 package handlers_test
 
 import (
-	"crypto/ecdsa"
+	//"crypto/sm2"
 	"crypto/elliptic"
-	"crypto/rand"
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/pem"
@@ -21,6 +20,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
+	"github.com/tjfoc/gmsm/sm2"
 )
 
 var _ = Describe("Revocation", func() {
@@ -43,13 +43,13 @@ var _ = Describe("Revocation", func() {
 		Context("and the underlying cryptographic algorithm succeed", func() {
 			var (
 				sk                  bccsp.Key
-				idemixRevocationKey *ecdsa.PrivateKey
+				idemixRevocationKey *sm2.PrivateKey
 				SKI                 []byte
 				pkBytes             []byte
 			)
 			BeforeEach(func() {
-				idemixRevocationKey = &ecdsa.PrivateKey{
-					PublicKey: ecdsa.PublicKey{
+				idemixRevocationKey = &sm2.PrivateKey{
+					PublicKey: sm2.PublicKey{
 						Curve: elliptic.P256(),
 						X:     big.NewInt(1), Y: big.NewInt(1)},
 					D: big.NewInt(1)}
@@ -159,7 +159,8 @@ var _ = Describe("Revocation", func() {
 			)
 
 			BeforeEach(func() {
-				key, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+				//key, err := sm2.GenerateKey(elliptic.P384(), rand.Reader)
+				key, err := sm2.GenerateKey()
 				Expect(err).NotTo(HaveOccurred())
 
 				raw, err = x509.MarshalPKIXPublicKey(key.Public())
@@ -205,7 +206,7 @@ var _ = Describe("Revocation", func() {
 
 			It("returns an error", func() {
 				k, err := RevocationPublicKeyImporter.KeyImport([]byte("fake-raw"), nil)
-				Expect(err).To(MatchError("Failed to decode revocation ECDSA public key"))
+				Expect(err).To(MatchError("Failed to decode revocation sm2 public key"))
 				Expect(k).To(BeNil())
 			})
 

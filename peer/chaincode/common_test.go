@@ -9,7 +9,7 @@ package chaincode
 
 import (
 	"context"
-	"crypto/tls"
+	//"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -35,6 +35,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	tls "github.com/tjfoc/gmtls"
 )
 
 func TestCheckChaincodeCmdParamsWithNewCallingSchema(t *testing.T) {

@@ -6,8 +6,6 @@ SPDX-License-Identifier: Apache-2.0
 package ca_test
 
 import (
-	"crypto/ecdsa"
-	"crypto/x509"
 	"net"
 	"os"
 	"path/filepath"
@@ -16,6 +14,8 @@ import (
 	"github.com/hyperledger/fabric/common/tools/cryptogen/ca"
 	"github.com/hyperledger/fabric/common/tools/cryptogen/csp"
 	"github.com/stretchr/testify/assert"
+	"github.com/tjfoc/gmsm/sm2"
+	"crypto/x509"
 )
 
 const (
@@ -44,7 +44,7 @@ func TestLoadCertificateECDSA(t *testing.T) {
 	assert.NoError(t, err, "Failed to generate signed certificate")
 
 	// get EC public key
-	ecPubKey, err := csp.GetECPublicKey(priv)
+	ecPubKey, err := csp.GetSM2PublicKey(priv)
 	assert.NoError(t, err, "Failed to generate signed certificate")
 	assert.NotNil(t, ecPubKey, "Failed to generate signed certificate")
 
@@ -57,11 +57,11 @@ func TestLoadCertificateECDSA(t *testing.T) {
 		[]x509.ExtKeyUsage{x509.ExtKeyUsageAny})
 	assert.NoError(t, err, "Failed to generate signed certificate")
 	// KeyUsage should be x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment
-	assert.Equal(t, x509.KeyUsageDigitalSignature|x509.KeyUsageKeyEncipherment,
+	assert.Equal(t, sm2.KeyUsageDigitalSignature|sm2.KeyUsageKeyEncipherment,
 		cert.KeyUsage)
-	assert.Contains(t, cert.ExtKeyUsage, x509.ExtKeyUsageAny)
+	assert.Contains(t, cert.ExtKeyUsage, sm2.ExtKeyUsageAny)
 
-	loadedCert, err := ca.LoadCertificateECDSA(certDir)
+	loadedCert, err := ca.LoadCertificateGMSM2(certDir)
 	assert.NotNil(t, loadedCert, "Should load cert")
 	assert.Equal(t, cert.SerialNumber, loadedCert.SerialNumber, "Should have same serial number")
 	assert.Equal(t, cert.Subject.CommonName, loadedCert.Subject.CommonName, "Should have same CN")
@@ -110,7 +110,7 @@ func TestGenerateSignCertificate(t *testing.T) {
 	assert.NoError(t, err, "Failed to generate signed certificate")
 
 	// get EC public key
-	ecPubKey, err := csp.GetECPublicKey(priv)
+	ecPubKey, err := csp.GetSM2PublicKey(priv)
 	assert.NoError(t, err, "Failed to generate signed certificate")
 	assert.NotNil(t, ecPubKey, "Failed to generate signed certificate")
 
@@ -123,9 +123,9 @@ func TestGenerateSignCertificate(t *testing.T) {
 		[]x509.ExtKeyUsage{x509.ExtKeyUsageAny})
 	assert.NoError(t, err, "Failed to generate signed certificate")
 	// KeyUsage should be x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment
-	assert.Equal(t, x509.KeyUsageDigitalSignature|x509.KeyUsageKeyEncipherment,
+	assert.Equal(t, sm2.KeyUsageDigitalSignature|sm2.KeyUsageKeyEncipherment,
 		cert.KeyUsage)
-	assert.Contains(t, cert.ExtKeyUsage, x509.ExtKeyUsageAny)
+	assert.Contains(t, cert.ExtKeyUsage, sm2.ExtKeyUsageAny)
 
 	cert, err = rootCA.SignCertificate(certDir, testName, nil, nil, ecPubKey,
 		x509.KeyUsageDigitalSignature, []x509.ExtKeyUsage{})
@@ -160,7 +160,7 @@ func TestGenerateSignCertificate(t *testing.T) {
 		Name:     "badCA",
 		SignCert: &x509.Certificate{},
 	}
-	_, err = badCA.SignCertificate(certDir, testName, nil, nil, &ecdsa.PublicKey{},
+	_, err = badCA.SignCertificate(certDir, testName, nil, nil, &sm2.PublicKey{},
 		x509.KeyUsageKeyEncipherment, []x509.ExtKeyUsage{x509.ExtKeyUsageAny})
 	assert.Error(t, err, "Empty CA should not be able to sign")
 	cleanup(testDir)

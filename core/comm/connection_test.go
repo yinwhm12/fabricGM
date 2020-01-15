@@ -8,7 +8,6 @@ package comm
 
 import (
 	"context"
-	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
@@ -22,6 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	tls "github.com/tjfoc/gmtls"
 )
 
 const (
